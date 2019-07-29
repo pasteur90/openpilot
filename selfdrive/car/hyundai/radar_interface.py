@@ -61,9 +61,9 @@ class RadarInterface(object):
 
     valid = cpt["SCC11"]['ACC_ObjStatus']
     if valid:
-      self.pts.dRel = cpt['LONG_DIST']  # from front of car
-      self.pts.yRel = -cpt['LAT_DIST']  # in car frame's y axis, left is positive
-      self.pts.vRel = cpt['REL_SPEED']
+      self.pts.dRel = cpt["SCC11"]['ACC_ObjDist']  # from front of car
+      self.pts.yRel = cpt["SCC11"]['ACC_ObjLatPos']  # in car frame's y axis, left is negative
+      self.pts.vRel = cpt["SCC11"]['ACC_ObjRelSpd']
       self.pts.aRel = float('nan')
       self.pts.yvRel = float('nan')
       self.pts.measured = True
