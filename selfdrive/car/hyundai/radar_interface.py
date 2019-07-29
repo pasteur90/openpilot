@@ -30,7 +30,7 @@ class RadarInterface(object):
     self.rcp = get_radar_can_parser(CP)
     self.trigger_msg = self.rcp.vl["SCC11"]['ACC_ObjStatus']
     self.updated_messages = set()
-    self.no_radar: False
+    self.no_radar = False
 
   def update(self, can_strings):
     if self.no_radar:
