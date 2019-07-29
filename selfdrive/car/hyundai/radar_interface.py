@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+import time
 from cereal import car
 from selfdrive.can.parser import CANParser
 from selfdrive.car.hyundai.values import DBC
-import time
+from common.realtime import sec_since_boot
 
 def get_radar_can_parser(CP):
 
