@@ -17,7 +17,7 @@ from selfdrive.swaglog import cloudlog
 
 class SteerLimitParams:
   STEER_MAX = 255   # >255 results in frozen torque, >409 results in no torque
-  STEER_DELTA_UP = 3
+  STEER_DELTA_UP = 2
   STEER_DELTA_DOWN = 5
   STEER_DRIVER_ALLOWANCE = 50
   STEER_DRIVER_MULTIPLIER = 2
