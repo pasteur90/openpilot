@@ -157,7 +157,6 @@ class CarController(object):
     ### Generate CAN Messages ###
 
     self.lkas11_cnt = self.cnt % 0x10
-    #self.clu11_cnt = self.cnt % 0x10
     self.mdps12_cnt = self.cnt % 0x100
 
     if self.camera_disconnected:
@@ -174,12 +173,6 @@ class CarController(object):
     if not self.camera_disconnected:
       can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12, CS.lkas11, \
                                     self.checksum))
-
-    #if pcm_cancel_cmd:
-     # can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.CANCEL, 0))
-    #elif CS.stopped and (self.cnt - self.last_resume_cnt) > 5:
-      #self.last_resume_cnt = self.cnt
-      #can_sends.append(create_clu11(self.packer, CS.clu11, Buttons.RES_ACCEL, 0))
 
     self.cnt += 1
 
