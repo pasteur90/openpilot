@@ -58,12 +58,12 @@ class CarInterface(object):
     ret.steerActuatorDelay = 0.1 
     ret.steerRateCost = 0.5
 
-    ret.lateralTuning.pid.kf = 0.00005
+    ret.lateralTuning.pid.kf = 0.000025
     ret.mass = 1985. + STD_CARGO_KG
-    ret.wheelbase = 2.78
-    ret.steerRatio = 15.0
+    ret.wheelbase = 2.7
+    ret.steerRatio = 14.0
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.20], [0.06]]
     ret.minSteerSpeed = 0.
 
     ret.minEnableSpeed = -1. 
