@@ -63,7 +63,7 @@ class CarInterface(object):
     ret.wheelbase = 2.7
     ret.steerRatio = 14.0
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.20], [0.06]]
+    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.22], [0.028]]
     ret.minSteerSpeed = 0.
 
     ret.minEnableSpeed = -1. 
