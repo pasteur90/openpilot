@@ -236,7 +236,7 @@ class CarState(object):
     self.car_gas = cp.vl["EMS12"]['TPS']
 
     # Learn Minimum Steer Speed
-    self.min_steer_speed = 14.3
+    self.min_steer_speed = 17.8816
 
     # Gear Selecton - This is not compatible with all Kia/Hyundai's, But is the best way for those it is compatible with
     gear = cp.vl["LVR12"]["CF_Lvr_Gear"]
