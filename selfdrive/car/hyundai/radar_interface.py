@@ -4,6 +4,7 @@ from cereal import car
 from selfdrive.can.parser import CANParser
 from selfdrive.car.hyundai.values import DBC
 from common.realtime import sec_since_boot
+from selfdrive.swaglog import cloudlog
 
 def get_radar_can_parser(CP):
 
@@ -44,9 +45,11 @@ class RadarInterface(object):
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
+      cloudlog.info("NO CAN message received")
       return None
 
     rr =  self._update(self.updated_messages)
+    cloudlog.info("New CAN message received")
     self.updated_messages.clear()
 
     return rr
@@ -62,6 +65,7 @@ class RadarInterface(object):
 
     valid = cpt["SCC11"]['ACC_ObjStatus']
     if valid:
+      cloudlog.info("Object is valid")
       for ii in range(20):
         if ii not in self.pts:
           self.pts[ii] = car.RadarData.RadarPoint.new_message()
@@ -73,6 +77,7 @@ class RadarInterface(object):
         self.pts[ii].aRel = float('nan')
         self.pts[ii].yvRel = float('nan')
         self.pts[ii].measured = True
-
+    else:
+      cloudlog.info("Object is invalid")
     ret.points = self.pts.values()
     return ret
