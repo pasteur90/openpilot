@@ -78,6 +78,11 @@ def get_can_parser(CP):
     ("MainMode_ACC", "SCC11", 0),
     ("VSetDis", "SCC11", 0),
     ("SCCInfoDisplay", "SCC11", 0),
+    ("ACC_ObjStatus", "SCC11", 0),
+    ("ACC_ObjLatPos", "SCC11", 0),
+    ("ACC_ObjDist", "SCC11", 0),
+    ("ACC_ObjRelSpd", "SCC11", 0),
+    
     ("ACCMode", "SCC12", 1),
 
     ("SAS_Angle", "SAS11", 0),
@@ -159,6 +164,7 @@ class CarState(object):
     self.right_blinker_on = 0
     self.right_blinker_flash = 0
     self.lkas_button_on = 0
+    self.scc11 = []
 
   def update(self, cp, cp_cam):
     # update prevs, update must run once per Loop
@@ -213,6 +219,7 @@ class CarState(object):
     self.steer_torque_driver = cp.vl["MDPS11"]['CR_Mdps_DrvTq']
     self.steer_torque_motor = cp.vl["MDPS12"]['CR_Mdps_OutTq']
     self.stopped = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
+    self.lead_distance = cp.vl["SCC11"]['SCCInfoDisplay']
 
     self.user_brake = 0
 
@@ -266,3 +273,5 @@ class CarState(object):
     self.lkas11 = cp_cam.vl["LKAS11"]
     self.clu11 = cp.vl["CLU11"]
     self.mdps12 = cp.vl["MDPS12"]
+    self.scc11 = cp.vl["SCC11"]
+    
