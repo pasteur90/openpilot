@@ -188,7 +188,7 @@ class CarState(object):
     self.v_wheel_rl = cp.vl["WHL_SPD11"]['WHL_SPD_RL'] * CV.KPH_TO_MS
     self.v_wheel_rr = cp.vl["WHL_SPD11"]['WHL_SPD_RR'] * CV.KPH_TO_MS
     v_wheel = (self.v_wheel_fl + self.v_wheel_fr + self.v_wheel_rl + self.v_wheel_rr) / 4.
-
+    v_wheel = v_wheel * 1.035
     self.low_speed_lockout = v_wheel < 1.0
 
     # Kalman filter, even though Hyundai raw wheel speed is heaviliy filtered by default
@@ -220,6 +220,8 @@ class CarState(object):
     self.steer_torque_motor = cp.vl["MDPS12"]['CR_Mdps_OutTq']
     self.stopped = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
     self.lead_distance = cp.vl["SCC11"]['SCCInfoDisplay']
+    self.lkas11_icon = cp_cam.vl["LKAS11"]['CF_Lkas_Bca_R']
+    self.mdps12_flt = cp.vl["MDPS12"]['CF_Mdps_ToiFlt']
 
     self.user_brake = 0
 
@@ -230,6 +232,16 @@ class CarState(object):
     else:
       self.pedal_gas = cp.vl["EMS12"]['TPS']
     self.car_gas = cp.vl["EMS12"]['TPS']
+
+    self.low_speed_alert = False
+
+    # If MDPS TOI faults, low speed alert
+    if self.mdps12_flt == 1:
+      self.low_speed_alert = True
+    # If we have LKAS_Icon == 2, then we know its 16.7m/s (Suspected this is only seen on Genesis)
+
+    if self.lkas11_icon == 2 and self.v_ego_raw < 16.8:
+      self.low_speed_alert = True
 
     # Gear Selecton - This is not compatible with all Kia/Hyundai's, But is the best way for those it is compatible with
     gear = cp.vl["LVR12"]["CF_Lvr_Gear"]

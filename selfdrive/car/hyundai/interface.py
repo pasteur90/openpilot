@@ -258,12 +258,6 @@ class CarInterface(object):
     ret.doorOpen = not self.CS.door_all_closed
     ret.seatbeltUnlatched = not self.CS.seatbelt
 
-    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgoRaw < self.CP.minSteerSpeed and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgoRaw > self.CP.minSteerSpeed:
-      self.low_speed_alert = False
-
     self.turning_indicator_alert = True if (self.CS.left_blinker_on or self.CS.right_blinker_on == 1) else False
 
     events = []
@@ -300,7 +294,7 @@ class CarInterface(object):
     #if ret.gasPressed:
       #events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if self.low_speed_alert:
+    if self.CS.low_speed_alert:
       events.append(create_event('belowSteerSpeed', [ET.WARNING]))
 
     if self.turning_indicator_alert:
@@ -320,7 +314,7 @@ class CarInterface(object):
 
     hud_alert = get_hud_alerts(c.hudControl.visualAlert)
     
-    enable = 0 if self.turning_indicator_alert or self.low_speed_alert else c.enabled
+    enable = 0 if self.turning_indicator_alert else c.enabled
 
     can_sends = self.CC.update(enable, self.CS, c.actuators,
                                c.cruiseControl.cancel, hud_alert)

@@ -30,16 +30,20 @@ class CarController(object):
     self.packer = CANPacker(dbc_name)
 
   def update(self, enabled, CS, actuators, pcm_cancel_cmd, hud_alert):
+    disable_steer = False
+    if CS.low_speed_alert:
+      disable_steer = True
 
     ### Steering Torque
     apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
 
     apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
 
-    if not enabled:
+    if not enabled or disable_steer:
       apply_steer = 0
-
-    steer_req = 1 if enabled else 0
+      steer_req = 0
+    else:
+      steer_req = 1
 
     self.apply_steer_last = apply_steer
 
