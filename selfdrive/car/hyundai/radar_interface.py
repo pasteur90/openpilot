@@ -33,11 +33,12 @@ class RadarInterface(object):
     self.trigger_msg = 0x420
     self.track_id = 0
     self.no_radar = False
+    self.pts[0] = car.RadarData.RadarPoint.new_message()
 
   def update(self, can_strings):
     if self.no_radar:
       ret = car.RadarData.new_message()
-      time.sleep(0.05)  # radard runs on RI updates
+      # time.sleep(0.05)  # radard runs on RI updates
       return ret
 
     tm = int(sec_since_boot() * 1e9)
@@ -45,11 +46,11 @@ class RadarInterface(object):
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
-      cloudlog.info("NO CAN message received")
+      # cloudlog.info("NO CAN message received")
       return None
 
     rr =  self._update(self.updated_messages)
-    cloudlog.info("New CAN message received")
+    # cloudlog.info("New CAN message received")
     self.updated_messages.clear()
 
     return rr
@@ -63,21 +64,17 @@ class RadarInterface(object):
       errors.append("canError")
     ret.errors = errors
 
-    valid = cpt["SCC11"]['ACC_ObjStatus']
-    if valid:
-      cloudlog.info("Object is valid")
-      for ii in range(20):
-        if ii not in self.pts:
-          self.pts[ii] = car.RadarData.RadarPoint.new_message()
-          self.pts[ii].trackId = self.track_id
-          self.track_id += 1
-        self.pts[ii].dRel = cpt["SCC11"]['ACC_ObjDist']  # from front of car
-        self.pts[ii].yRel = cpt["SCC11"]['ACC_ObjLatPos']  # in car frame's y axis, left is negative
-        self.pts[ii].vRel = cpt["SCC11"]['ACC_ObjRelSpd']
-        self.pts[ii].aRel = float('nan')
-        self.pts[ii].yvRel = float('nan')
-        self.pts[ii].measured = True
+    status = cpt["SCC11"]['ACC_ObjStatus']
+    if status == 1:
+      self.pts[0].trackId = 0
+      self.pts[0].dRel = cpt["SCC11"]['ACC_ObjDist']  # from front of car
+      self.pts[0].yRel = cpt["SCC11"]['ACC_ObjLatPos']  # in car frame's y axis, left is negative
+      self.pts[0].vRel = cpt["SCC11"]['ACC_ObjRelSpd']
+      self.pts[0].aRel = float('nan')
+      self.pts[0].yvRel = float('nan')
+      self.pts[0].measured = True
     else:
-      cloudlog.info("Object is invalid")
-    ret.points = self.pts.values()
+      self.pts[0].measured = False
+
+    ret.points = [x for x in self.pts.values() if x.measured == True]
     return ret
