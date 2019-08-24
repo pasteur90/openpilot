@@ -219,7 +219,6 @@ class CarState(object):
     self.steer_torque_driver = cp.vl["MDPS11"]['CR_Mdps_DrvTq']
     self.steer_torque_motor = cp.vl["MDPS12"]['CR_Mdps_OutTq']
     self.stopped = cp.vl["SCC11"]['SCCInfoDisplay'] == 4.
-    self.lead_distance = cp.vl["SCC11"]['SCCInfoDisplay']
     self.lkas11_icon = cp_cam.vl["LKAS11"]['CF_Lkas_Bca_R']
     self.mdps12_flt = cp.vl["MDPS12"]['CF_Mdps_ToiFlt']
 
