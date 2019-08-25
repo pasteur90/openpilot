@@ -293,8 +293,8 @@ class CarInterface(object):
     #if ret.gasPressed:
       #events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if self.CS.low_speed_alert:
-      events.append(create_event('belowSteerSpeed', [ET.WARNING]))
+    # if self.CS.low_speed_alert:
+    #   events.append(create_event('belowSteerSpeed', [ET.WARNING]))
 
     if self.turning_indicator_alert:
       events.append(create_event('turningIndicatorOn', [ET.WARNING]))
