@@ -165,6 +165,7 @@ class CarState(object):
     self.right_blinker_flash = 0
     self.lkas_button_on = 0
     self.scc11 = []
+    self.min_steer_speed = 0.0
 
   def update(self, cp, cp_cam):
     # update prevs, update must run once per Loop
@@ -233,6 +234,10 @@ class CarState(object):
     self.car_gas = cp.vl["EMS12"]['TPS']
 
     self.low_speed_alert = False
+
+    if self.mdps12_flt != 0 and self.v_ego_raw > 0. and abs(self.angle_steers) < 5.0 and self.lkas11_icon != 2:
+      if self.v_ego_raw > self.min_steer_speed:
+        self.min_steer_speed = self.v_ego_raw + 0.1
 
     # If MDPS TOI faults, low speed alert
     if self.mdps12_flt == 1:

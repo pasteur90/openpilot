@@ -16,6 +16,9 @@ class SteerLimitParams:
   STEER_DRIVER_MULTIPLIER = 2
   STEER_DRIVER_FACTOR = 1
 
+class LowSpeedSteerLimitParams(SteerLimitParams):
+  STEER_MAX = 38
+
 class CarController(object):
   def __init__(self, dbc_name, car_fingerprint):
     self.apply_steer_last = 0
@@ -35,9 +38,13 @@ class CarController(object):
       disable_steer = True
 
     ### Steering Torque
+
     apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
 
-    apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
+    if CS.min_steer_speed >= CS.v_ego_raw:
+      apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, LowSpeedSteerLimitParams)
+    else:
+      apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
 
     if not enabled or disable_steer:
       apply_steer = 0
