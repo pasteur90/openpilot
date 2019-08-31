@@ -17,7 +17,7 @@ class SteerLimitParams:
   STEER_DRIVER_FACTOR = 1
 
 class LowSpeedSteerLimitParams(SteerLimitParams):
-  STEER_MAX = 38
+  STEER_MAX = 36
 
 class CarController(object):
   def __init__(self, dbc_name, car_fingerprint):
