@@ -304,7 +304,7 @@ class CarInterface(object):
 
     if ret.cruiseState.enabled and not self.cruise_enabled_prev:
       events.append(create_event('pcmEnable', [ET.ENABLE]))
-    if not self.CS.lkas_button_on:
+    elif not ret.cruiseState.enabled:
       events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
 
     # enable request in prius is simple, as we activate when Toyota is active (rising edge)
@@ -321,8 +321,8 @@ class CarInterface(object):
     #if ret.gasPressed:
       #events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if self.turning_indicator_alert:
-      events.append(create_event('turningIndicatorOn', [ET.WARNING]))
+    # if self.low_speed_alert:
+    #   events.append(create_event('belowSteerSpeed', [ET.WARNING]))
 
     if self.turning_indicator_alert:
       events.append(create_event('turningIndicatorOn', [ET.WARNING]))

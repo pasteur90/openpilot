@@ -86,6 +86,7 @@ class CarController(object):
     self.lkas11_cnt = frame % 0x10
     self.mdps12_cnt = frame % 0x100
 
+
     if self.camera_disconnected:
       if (frame % 10) == 0:
         can_sends.append(create_lkas12())
