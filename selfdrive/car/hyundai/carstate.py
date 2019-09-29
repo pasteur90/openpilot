@@ -106,6 +106,7 @@ def get_camera_parser(CP):
 
   signals = [
     # sig_name, sig_address, default
+    ("CF_Lkas_Bca_R", "LKAS11", 0),
     ("CF_Lkas_LdwsSysState", "LKAS11", 0),
     ("CF_Lkas_SysWarning", "LKAS11", 0),
     ("CF_Lkas_LdwsLHWarning", "LKAS11", 0),
@@ -120,7 +121,13 @@ def get_camera_parser(CP):
     ("CF_Lkas_FcwCollisionWarning", "LKAS11", 0),
     ("CF_Lkas_FusionState", "LKAS11", 0),
     ("CF_Lkas_FcwOpt_USM", "LKAS11", 0),
-    ("CF_Lkas_LdwsOpt_USM", "LKAS11", 0)
+    ("CF_Lkas_LdwsOpt_USM", "LKAS11", 0),
+    ("CF_Lkas_Unknown1", "LKAS11", 0),
+    ("CF_Lkas_Unknown2", "LKAS11", 0),
+    ("CF_Lkas_ActToi", "LKAS11", 0),
+    ("CR_Lkas_StrToqReq", "LKAS11", 0),
+    ("CF_Lkas_MsgCount", "LKAS11", 0),
+    ("CF_Lkas_Chksum", "LKAS11", 0)
   ]
 
   checks = []
@@ -150,6 +157,8 @@ class CarState(object):
     self.right_blinker_on = 0
     self.right_blinker_flash = 0
     self.has_scc = False
+    self.lkas_button_on = 0
+    self.min_steer_speed = 0.0
 
   def update(self, cp, cp_cam):
     # update prevs, update must run once per Loop
@@ -176,7 +185,7 @@ class CarState(object):
     self.v_wheel_rl = cp.vl["WHL_SPD11"]['WHL_SPD_RL'] * CV.KPH_TO_MS
     self.v_wheel_rr = cp.vl["WHL_SPD11"]['WHL_SPD_RR'] * CV.KPH_TO_MS
     v_wheel = (self.v_wheel_fl + self.v_wheel_fr + self.v_wheel_rl + self.v_wheel_rr) / 4.
-
+    v_wheel = v_wheel * 1.035
     self.low_speed_lockout = v_wheel < 1.0
 
     # Kalman filter, even though Hyundai raw wheel speed is heaviliy filtered by default
@@ -211,6 +220,8 @@ class CarState(object):
     self.steer_torque_motor = cp.vl["MDPS12"]['CR_Mdps_OutTq']
     self.stopped = cp.vl["SCC11"]['SCCInfoDisplay'] == 4. if self.has_scc else False
     self.lead_distance = cp.vl["SCC11"]['ACC_ObjDist'] if self.has_scc else 0
+    self.lkas11_icon = cp_cam.vl["LKAS11"]['CF_Lkas_Bca_R']
+    self.mdps12_flt = cp.vl["MDPS12"]['CF_Mdps_ToiFlt']
 
     self.user_brake = 0
 
@@ -221,6 +232,20 @@ class CarState(object):
     else:
       self.pedal_gas = cp.vl["EMS12"]['TPS']
     self.car_gas = cp.vl["EMS12"]['TPS']
+
+    self.low_speed_alert = False
+
+    if self.mdps12_flt != 0 and self.v_ego_raw > 0. and abs(self.angle_steers) < 5.0 and self.lkas11_icon != 2:
+      if self.v_ego_raw > self.min_steer_speed:
+        self.min_steer_speed = self.v_ego_raw + 0.1
+
+    # If MDPS TOI faults, low speed alert
+    if self.mdps12_flt == 1:
+      self.low_speed_alert = True
+    # If we have LKAS_Icon == 2, then we know its 16.7m/s (Suspected this is only seen on Genesis)
+
+    if self.lkas11_icon == 2 and self.v_ego_raw < 16.8:
+      self.low_speed_alert = True
 
     # Gear Selecton - This is not compatible with all Kia/Hyundai's, But is the best way for those it is compatible with
     gear = cp.vl["LVR12"]["CF_Lvr_Gear"]

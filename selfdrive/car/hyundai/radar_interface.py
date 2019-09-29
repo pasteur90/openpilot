@@ -19,10 +19,7 @@ def get_radar_can_parser(CP):
     # address, frequency
     ("SCC11", 50),
   ]
-
-
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, 0)
-
 
 class RadarInterface(object):
   def __init__(self, CP):

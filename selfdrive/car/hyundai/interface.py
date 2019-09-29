@@ -19,6 +19,10 @@ class CarInterface(object):
     self.gas_pressed_prev = False
     self.brake_pressed_prev = False
     self.cruise_enabled_prev = False
+    self.low_speed_alert = False
+    self.lkas_button_on_prev = False
+    self.vEgo_prev = False
+    self.turning_indicator_alert = False
 
     # *** init the major players ***
     self.CS = CarState(CP)
@@ -51,7 +55,11 @@ class CarInterface(object):
 
     ret.steerActuatorDelay = 0.1  # Default delay
     ret.steerRateCost = 0.5
+
     tire_stiffness_factor = 1.
+
+    ret.minEnableSpeed = -1.   # enable is done by stock ACC, so ignore this
+    ret.minSteerSpeed = 0.
 
     if candidate in [CAR.SANTA_FE, CAR.SANTA_FE_1]:
       ret.lateralTuning.pid.kf = 0.00005
@@ -84,7 +92,14 @@ class CarInterface(object):
       ret.lateralTuning.pid.kf = 0.00005
       ret.mass = 2060. + STD_CARGO_KG
       ret.wheelbase = 3.01
-      ret.steerRatio = 16.5
+      ret.steerRatio = 12.069
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.16], [0.01]]
+      ret.minSteerSpeed = 60 * CV.KPH_TO_MS
+    elif candidate == CAR.GENESIS_G90 or candidate == CAR.GENESIS_G80:
+      ret.mass = 2200
+      ret.wheelbase = 3.15
+      ret.steerRatio = 12.069
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.16], [0.01]]
       ret.minSteerSpeed = 60 * CV.KPH_TO_MS
@@ -134,9 +149,16 @@ class CarInterface(object):
       tire_stiffness_factor = 0.5
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+    elif candidate == CAR.I30:
+      ret.lateralTuning.pid.kf = 0.00006
+      ret.mass = 1275. + STD_CARGO_KG
+      ret.wheelbase = 2.7
+      ret.steerRatio = 13.73   #Spec
+      tire_stiffness_factor = 0.385
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+      ret.minSteerSpeed = 32 * CV.MPH_TO_MS
 
-
-    ret.minEnableSpeed = -1.   # enable is done by stock ACC, so ignore this
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [0.]
     ret.longitudinalTuning.kiBP = [0.]
@@ -282,8 +304,14 @@ class CarInterface(object):
 
     if ret.cruiseState.enabled and not self.cruise_enabled_prev:
       events.append(create_event('pcmEnable', [ET.ENABLE]))
-    elif not ret.cruiseState.enabled:
+    if not self.CS.lkas_button_on:
       events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
+
+    # enable request in prius is simple, as we activate when Toyota is active (rising edge)
+    #if ret.cruiseState.enabled and not self.cruise_enabled_prev:
+      #events.append(create_event('pcmEnable', [ET.ENABLE]))
+    #elif not ret.cruiseState.enabled:
+      #events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
 
     # disable on pedals rising edge or when brake is pressed and speed isn't zero
     #if (ret.gasPressed and not self.gas_pressed_prev) or \
@@ -293,8 +321,8 @@ class CarInterface(object):
     #if ret.gasPressed:
       #events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
-    if self.low_speed_alert:
-      events.append(create_event('belowSteerSpeed', [ET.WARNING]))
+    if self.turning_indicator_alert:
+      events.append(create_event('turningIndicatorOn', [ET.WARNING]))
 
     if self.turning_indicator_alert:
       events.append(create_event('turningIndicatorOn', [ET.WARNING]))
@@ -304,6 +332,8 @@ class CarInterface(object):
     self.gas_pressed_prev = ret.gasPressed
     self.brake_pressed_prev = ret.brakePressed
     self.cruise_enabled_prev = ret.cruiseState.enabled
+    self.lkas_button_on_prev = self.CS.lkas_button_on
+    self.vEgo_prev = ret.vEgo
 
     return ret.as_reader()
 
