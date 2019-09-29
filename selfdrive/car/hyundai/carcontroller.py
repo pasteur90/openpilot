@@ -1,7 +1,7 @@
 from selfdrive.car import apply_std_steer_torque_limits
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
                                              create_1191, create_1156, \
-                                             create_clu11, create_mdps12
+                                             create_clu11
 from selfdrive.car.hyundai.values import Buttons
 from selfdrive.can.packer import CANPacker
 
@@ -84,8 +84,6 @@ class CarController(object):
     can_sends = []
 
     self.lkas11_cnt = frame % 0x10
-    self.mdps12_cnt = frame % 0x100
-
 
     if self.camera_disconnected:
       if (frame % 10) == 0:
@@ -94,8 +92,6 @@ class CarController(object):
         can_sends.append(create_1191())
       if (frame % 7) == 0:
         can_sends.append(create_1156())
-    elif not pcm_cancel_cmd:
-      can_sends.append(create_mdps12(self.packer, self.car_fingerprint, self.mdps12_cnt, CS.mdps12))
 
     can_sends.append(create_lkas11(self.packer, self.car_fingerprint, apply_steer, steer_req, self.lkas11_cnt,
                                    enabled, CS.lkas11, hud_alert, lane_visible, left_lane_depart, right_lane_depart,
