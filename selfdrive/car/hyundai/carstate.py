@@ -200,7 +200,6 @@ class CarState(object):
     self.v_wheel_rl = cp.vl["WHL_SPD11"]['WHL_SPD_RL'] * CV.KPH_TO_MS
     self.v_wheel_rr = cp.vl["WHL_SPD11"]['WHL_SPD_RR'] * CV.KPH_TO_MS
     v_wheel = (self.v_wheel_fl + self.v_wheel_fr + self.v_wheel_rl + self.v_wheel_rr) / 4.
-    v_wheel = v_wheel * 1.035
     self.low_speed_lockout = v_wheel < 1.0
 
     # Kalman filter, even though Hyundai raw wheel speed is heaviliy filtered by default
