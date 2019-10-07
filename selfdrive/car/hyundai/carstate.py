@@ -175,6 +175,7 @@ class CarState(object):
     self.lkas_button_on = 0
     self.min_steer_speed = 0.0
     self.no_radar = self.CP.carFingerprint in FEATURES["non_scc"]
+    self.low_speed_alert = False
 
   def update(self, cp, cp_cam):
     # update prevs, update must run once per Loop
@@ -244,8 +245,6 @@ class CarState(object):
       self.pedal_gas = cp.vl["EMS12"]['TPS']
     self.car_gas = cp.vl["EMS12"]['TPS']
 
-    self.low_speed_alert = False
-
     if self.mdps12_flt != 0 and self.v_ego_raw > 0. and abs(self.angle_steers) < 5.0 and self.lkas11_icon != 2:
       if self.v_ego_raw > self.min_steer_speed:
         self.min_steer_speed = self.v_ego_raw + 0.1
@@ -254,9 +253,10 @@ class CarState(object):
     if self.mdps12_flt == 1:
       self.low_speed_alert = True
     # If we have LKAS_Icon == 2, then we know its 16.7m/s (Suspected this is only seen on Genesis)
-
-    if self.lkas11_icon == 2 and self.v_ego_raw < 16.8:
+    elif self.lkas11_icon == 2 and self.v_ego_raw < 16.8:
       self.low_speed_alert = True
+    else:
+      self.low_speed_alert = False
 
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection, as this seems to be standard over all cars, but is not the preferred method.
     if self.car_fingerprint in FEATURES["use_cluster_gears"]:

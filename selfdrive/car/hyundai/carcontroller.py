@@ -5,6 +5,7 @@ from selfdrive.car.hyundai.hyundaican import create_lkas11, create_lkas12, \
                                              create_clu11
 from selfdrive.car.hyundai.values import CAR, Buttons
 from selfdrive.can.packer import CANPacker
+from common.numpy_fast import clip
 
 
 # Steer torque limits
@@ -79,12 +80,15 @@ class CarController(object):
       disable_steer = True
 
     ### Steering Torque
-
-    apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
-
     if CS.min_steer_speed >= CS.v_ego_raw:
+      apply_steer = actuators.steer * LowSpeedSteerLimitParams.STEER_MAX
       apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, LowSpeedSteerLimitParams)
+      if apply_steer < 0:
+        apply_steer = clip(apply_steer, -LowSpeedSteerLimitParams.STEER_MAX, 0)
+      else:
+        apply_steer = clip(apply_steer, 0, LowSpeedSteerLimitParams.STEER_MAX)
     else:
+      apply_steer = actuators.steer * SteerLimitParams.STEER_MAX
       apply_steer = apply_std_steer_torque_limits(apply_steer, self.apply_steer_last, CS.steer_torque_driver, SteerLimitParams)
 
     if not enabled or disable_steer:
