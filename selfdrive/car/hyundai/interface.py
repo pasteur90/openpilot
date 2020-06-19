@@ -71,13 +71,18 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
     elif candidate in [CAR.ELANTRA, CAR.ELANTRA_GT_I30]:
-      ret.lateralTuning.pid.kf = 0.00006
-      ret.mass = 1275. + STD_CARGO_KG
+      # ret.lateralTuning.pid.kf = 0.00006
+      ret.mass = 1411. + STD_CARGO_KG
       ret.wheelbase = 2.7
-      ret.steerRatio = 15.4            # 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535
-      tire_stiffness_factor = 0.385    # stiffnessFactor settled on 1.0081302973865127
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+      ret.steerRatio = 13.6            # 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535
+      tire_stiffness_factor = 1.5    # stiffnessFactor settled on 1.0081302973865127
+      # ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      # ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGain = 3.3
+      ret.lateralTuning.indi.outerLoopGain = 2.3
+      ret.lateralTuning.indi.timeConstant = 1.0
+      ret.lateralTuning.indi.actuatorEffectiveness = 1.3
       ret.minSteerSpeed = 32 * CV.MPH_TO_MS
     elif candidate == CAR.HYUNDAI_GENESIS:
       ret.lateralTuning.pid.kf = 0.00005
